@@ -1,19 +1,19 @@
-import { envs } from './config/envs';
-import { AppRoutes } from './presentation/routes';
-import { Server } from './presentation/server';
+import { createServer } from "http";
+import { envs } from "./config/envs";
+import { AppRoutes } from "./presentation/routes";
+import { ExpressServer } from "./presentation/server";
+import { WssService } from "./presentation/services/wss.service";
 
-
-(async()=> {
-  main();
-})();
-
+(async () => main())();
 
 function main() {
+  const server = new ExpressServer({});
+  const httpServer = createServer(server.app);
+  WssService.initWss({ server: httpServer });
 
-  const server = new Server({
-    port: envs.PORT,
-    routes: AppRoutes.routes,
-  });
+  server.setRoutes(AppRoutes.routes);
 
-  server.start();
+  httpServer.listen(envs.PORT, () =>
+    console.log(`Server on port: ${envs.PORT}`)
+  );
 }
